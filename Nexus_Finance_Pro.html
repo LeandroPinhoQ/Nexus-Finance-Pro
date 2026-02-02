@@ -1,0 +1,2849 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Finance Pro | 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #020205;
+            --bg-card: rgba(10, 10, 15, 0.8);
+            --accent: #00f2ff;
+            --accent-glow: rgba(0, 242, 255, 0.4);
+            --text-main: #f0f0f0;
+            --text-dim: #8892b0;
+            --danger: #ff0055;
+            --success: #00ffaa;
+            --warning: #ffb700;
+            --sidebar-width: 280px;
+            --card-bg: rgba(15, 15, 25, 0.95);
+        }
+
+        [data-theme="light"] {
+            --bg-body: #f5f5f7;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --accent: #0066ff;
+            --accent-glow: rgba(0, 102, 255, 0.2);
+            --text-main: #1d1d1f;
+            --text-dim: #6e6e73;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --warning: #ff9500;
+            --card-bg: rgba(255, 255, 255, 0.98);
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Space Grotesk', sans-serif; 
+        }
+
+        body {
+            background: var(--bg-body);
+            background-image: radial-gradient(circle at 50% 50%, #101015 0%, #020205 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            transition: background 0.5s ease, color 0.3s ease;
+        }
+
+        [data-theme="light"] body {
+            background-image: radial-gradient(circle at 50% 50%, #ffffff 0%, #f5f5f7 100%);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(5, 5, 8, 0.95);
+            border-right: 1px solid rgba(0, 242, 255, 0.1);
+            height: 100vh;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="light"] .sidebar {
+            background: rgba(255, 255, 255, 0.98);
+            border-right: 1px solid rgba(0, 102, 255, 0.1);
+        }
+
+        .sidebar-logo {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 40px;
+            border: 2px solid var(--accent);
+            padding: 20px 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            font-weight: 900;
+            letter-spacing: 5px;
+            text-shadow: 0 0 15px var(--accent-glow);
+            font-size: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-logo::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, var(--accent-glow), transparent);
+            animation: logoShine 3s linear infinite;
+        }
+
+        @keyframes logoShine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .sidebar-logo span {
+            font-size: 0.7rem;
+            letter-spacing: 8px;
+            margin-top: 8px;
+            color: var(--text-main);
+            text-shadow: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar-logo .pro-badge {
+            font-size: 0.5rem;
+            background: var(--accent);
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .nav-menu { display: flex; flex-direction: column; gap: 10px; flex-grow: 1; }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 14px 18px;
+            color: var(--text-dim);
+            text-align: left;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: 600;
+            font-size: 0.85rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--accent);
+            border-color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .nav-btn:hover::before, .nav-btn.active::before {
+            transform: scaleY(1);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 40px;
+            max-width: calc(100vw - var(--sidebar-width));
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.05), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 242, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 242, 255, 0.1);
+        }
+
+        input, select {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 15px;
+            color: var(--text-main);
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        select { background-color: rgba(0,0,0,0.3) !important; }
+        [data-theme="light"] select { background-color: rgba(255,255,255,0.9) !important; }
+
+        .btn-action { 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            border: none; 
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary { 
+            background: var(--accent); 
+            color: #000; 
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .tab-content { display: none; animation: fadeIn 0.5s ease; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .month-nav { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 40px; 
+            margin-bottom: 40px; 
+        }
+
+        #currentMonth {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            font-size: 1.5rem;
+            min-width: 250px;
+            text-align: center;
+            font-weight: 700;
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, var(--accent-glow), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::after {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            position: relative;
+            z-index: 1;
+        }
+
+        .expense-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 20px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .expense-card:hover {
+            border-color: var(--accent);
+            transform: translateX(5px);
+            box-shadow: -5px 0 20px var(--accent-glow);
+        }
+
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+        }
+
+        .expense-info h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: var(--text-main);
+        }
+
+        .expense-info p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .expense-amount {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .btn-status { 
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            font-weight: 800; 
+            font-size: 0.7rem; 
+            border: none; 
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .status-pago { 
+            background: var(--success); 
+            color: #000; 
+        }
+
+        .status-pendente { 
+            background: var(--danger); 
+            color: #fff; 
+        }
+
+        .btn-status:hover {
+            transform: scale(1.05);
+        }
+
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .progress-bg { 
+            background: rgba(255, 255, 255, 0.1); 
+            height: 12px; 
+            border-radius: 10px; 
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill { 
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            height: 100%; 
+            transition: width 0.6s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .goal-card {
+            background: var(--card-bg);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .goal-card:hover {
+            border-color: var(--accent);
+            transform: scale(1.02);
+        }
+
+        .goal-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .goal-icon {
+            font-size: 2.5rem;
+        }
+
+        .goal-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .goal-info p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .alert-box {
+            background: rgba(255, 185, 0, 0.1);
+            border-left: 4px solid var(--warning);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideInRight 0.5s ease;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .calendar-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-day:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.has-income {
+            border-left: 3px solid var(--success);
+        }
+
+        .calendar-day.has-expense {
+            border-left: 3px solid var(--danger);
+        }
+
+        .calendar-day.has-both {
+            border-left: 3px solid var(--warning);
+        }
+
+        .insights-section {
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(0, 255, 170, 0.1));
+            border: 1px solid var(--accent);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .insight-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: start;
+        }
+
+        .insight-icon {
+            font-size: 1.5rem;
+            min-width: 40px;
+        }
+
+        .insight-text h4 {
+            margin-bottom: 5px;
+            color: var(--accent);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 20px 25px;
+            min-width: 300px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 3000;
+            animation: slideInRight 0.5s ease;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+        }
+
+        .forecast-section {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .forecast-month {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .forecast-month:last-child {
+            border-bottom: none;
+        }
+
+        .forecast-month.warning {
+            background: rgba(255, 185, 0, 0.05);
+            border-left: 3px solid var(--warning);
+            border-radius: 8px;
+        }
+
+        .forecast-month.danger {
+            background: rgba(255, 0, 85, 0.05);
+            border-left: 3px solid var(--danger);
+            border-radius: 8px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .chart-container {
+            height: 350px;
+            margin-top: 20px;
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--success);
+        }
+
+        /* Responsividade */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+            
+            --sidebar-width: 220px;
+            
+            .main-content {
+                margin-left: 220px;
+                padding: 30px 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                width: 280px;
+                transition: left 0.3s ease;
+                z-index: 1000;
+                box-shadow: 5px 0 20px rgba(0, 0, 0, 0.5);
+            }
+            
+            .sidebar.mobile-open {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px 15px;
+                max-width: 100vw;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .theme-toggle {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+            }
+            
+            .month-nav {
+                gap: 20px;
+            }
+            
+            #currentMonth {
+                font-size: 1.1rem;
+                min-width: 180px;
+            }
+            
+            .expense-card {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .category-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .glass-card {
+                padding: 20px;
+            }
+            
+            .data-table {
+                font-size: 0.85rem;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 10px 8px;
+            }
+            
+            /* Botão de menu hamburguer */
+            .mobile-menu-btn {
+                display: block;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                width: 45px;
+                height: 45px;
+                background: var(--card-bg);
+                border: 2px solid var(--accent);
+                border-radius: 50%;
+                cursor: pointer;
+                z-index: 999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                backdrop-filter: blur(10px);
+                transition: all 0.3s ease;
+            }
+            
+            .mobile-menu-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 0 20px var(--accent-glow);
+            }
+            
+            /* Overlay quando menu aberto */
+            .mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 999;
+                backdrop-filter: blur(5px);
+            }
+            
+            .mobile-overlay.active {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .sidebar-logo {
+                font-size: 1.2rem;
+                padding: 15px 5px;
+                letter-spacing: 3px;
+            }
+            
+            .sidebar-logo span {
+                font-size: 0.6rem;
+                letter-spacing: 5px;
+            }
+            
+            .nav-btn {
+                padding: 12px 15px;
+                font-size: 0.8rem;
+            }
+            
+            .stat-value {
+                font-size: 1.4rem;
+            }
+            
+            .stat-label {
+                font-size: 0.7rem;
+            }
+            
+            #currentMonth {
+                font-size: 1rem;
+                min-width: 150px;
+            }
+            
+            h1, h2, h3 {
+                font-size: 1.1rem !important;
+            }
+        }
+        
+        /* Desktop grande */
+        @media (min-width: 1920px) {
+            .main-content {
+                max-width: 1600px;
+                margin-left: auto;
+                margin-right: auto;
+                padding-left: calc((100vw - 1600px) / 2 + 280px);
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <span id="themeIcon">🌙</span>
+    </div>
+
+    <div class="mobile-menu-btn" onclick="toggleMobileMenu()" style="display: none;">
+        <span>☰</span>
+    </div>
+
+    <div class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            NEXUS
+            <span>FINANCE</span>
+            <span class="pro-badge">PRO</span>
+        </div>
+        <nav class="nav-menu">
+            <button class="nav-btn" data-tab="resumo-anual">📈 Resumo Anual</button>
+            <button class="nav-btn active" data-tab="dashboard">📊 Dashboard Mensal</button>
+            <button class="nav-btn" data-tab="receitas">💵 Receitas</button>
+            <button class="nav-btn" data-tab="despesas">📉 Despesas</button>
+            <button class="nav-btn" data-tab="dividas">🏦 Dívidas</button>
+            <button class="nav-btn" data-tab="metas">🎯 Metas</button>
+            <button class="nav-btn" data-tab="insights">💡 Insights AI</button>
+            <button class="nav-btn" data-tab="previsao">📈 Previsão</button>
+            <button class="nav-btn" data-tab="categorias">📂 Categorias</button>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="month-nav">
+            <button class="btn-action btn-primary" onclick="changeMonth(-1)">◄</button>
+            <div id="currentMonth">Janeiro 2026</div>
+            <button class="btn-action btn-primary" onclick="changeMonth(1)">►</button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Faturamento Mensal</div>
+                    <div id="dashRec" class="stat-value" style="color:var(--success)">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Custo Mensal</div>
+                    <div id="dashDesp" class="stat-value" style="color:var(--danger)">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Margem Prevista</div>
+                    <div id="dashSaldo" class="stat-value">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Taxa de Poupança</div>
+                    <div id="savingsRate" class="stat-value" style="color:var(--accent)">0%</div>
+                </div>
+            </div>
+
+            <div id="alertsContainer"></div>
+
+            <div class="glass-card">
+                <h3 style="color:var(--accent); margin-bottom:20px; font-size: 1.3rem;">📊 Receitas × Despesas — Mês Atual</h3>
+                <div class="chart-container"><canvas id="monthChart"></canvas></div>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="color:var(--accent); margin-bottom:20px; font-size: 1.3rem;">🏦 Dívidas em Aberto</h3>
+                <div id="dashboardDebtList"></div>
+            </div>
+        </div>
+
+        <!-- RESUMO ANUAL -->
+        <div id="resumo-anual" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Receita Total Anual</div>
+                    <div id="annualRecTotal" class="stat-value" style="color:var(--success)">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Despesa Total Anual</div>
+                    <div id="annualDespTotal" class="stat-value" style="color:var(--danger)">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Sobra Acumulada</div>
+                    <div id="annualSaldoTotal" class="stat-value" style="color:var(--accent)">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Taxa Poupança Média</div>
+                    <div id="annualSavingsRate" class="stat-value" style="color:var(--accent)">0%</div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="color:var(--accent); margin-bottom:20px; font-size: 1.3rem;">📊 Evolução Mensal - Ano Completo</h3>
+                <div class="chart-container"><canvas id="annualChart"></canvas></div>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="color:var(--accent); margin-bottom:20px; font-size: 1.3rem;">📋 Resumo Mês a Mês</h3>
+                <div id="monthlyBreakdown"></div>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="color:var(--accent); margin-bottom:20px; font-size: 1.3rem;">🎯 Despesas por Categoria (Anual)</h3>
+                <div class="chart-container"><canvas id="categoriesChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- RECEITAS -->
+        <div id="receitas" class="tab-content">
+            <div class="glass-card">
+                <h3 style="margin-bottom: 20px; font-size: 1.3rem;">+ Nova Receita</h3>
+                <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 15px;">
+                    <input type="text" id="recDesc" placeholder="Descrição (ex: Salário, Freelance)">
+                    <input type="number" step="0.01" id="recVal" placeholder="Valor R$">
+                    <button class="btn-action btn-primary" onclick="addItem('receitas')">SALVAR</button>
+                </div>
+            </div>
+            <div id="receitasList"></div>
+        </div>
+
+        <!-- DESPESAS -->
+        <div id="despesas" class="tab-content">
+            <div class="glass-card">
+                <h3 style="margin-bottom: 20px; font-size: 1.3rem;">- Registrar Despesa</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end;">
+                    <div>
+                        <label style="font-size:0.75rem; color:var(--accent); display:block; margin-bottom:8px;">DESCRIÇÃO</label>
+                        <input type="text" id="despDesc" placeholder="Ex: Aluguel">
+                    </div>
+                    <div>
+                        <label style="font-size:0.75rem; color:var(--accent); display:block; margin-bottom:8px;">VALOR</label>
+                        <input type="number" step="0.01" id="despVal" placeholder="R$">
+                    </div>
+                    <div>
+                        <label style="font-size:0.75rem; color:var(--accent); display:block; margin-bottom:8px;">CATEGORIA</label>
+                        <select id="despCategoria">
+                            <optgroup label="📂 Categorias" id="categoriesGroup"></optgroup>
+                            <optgroup label="🎯 Metas" id="metasCategories"></optgroup>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.75rem; color:var(--accent); display:block; margin-bottom:8px;">TIPO</label>
+                        <select id="despTipo" onchange="toggleDebtSelect()">
+                            <option value="Variável">Variável</option>
+                            <option value="Fixa">Fixa</option>
+                            <option value="Amortização">Amortização 🏦</option>
+                        </select>
+                    </div>
+                    <div id="debtSelectGroup" style="display:none;">
+                        <label style="font-size:0.75rem; color:var(--accent); display:block; margin-bottom:8px;">VÍNCULO</label>
+                        <select id="despDebtLink"></select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.75rem; color:var(--accent); display:block; margin-bottom:8px;">STATUS</label>
+                        <select id="despPago">
+                            <option value="não">PENDENTE</option>
+                            <option value="sim">PAGO</option>
+                        </select>
+                    </div>
+                    <button class="btn-action btn-primary" onclick="addItem('despesas')">REGISTRAR</button>
+                </div>
+            </div>
+            <div id="despesasList"></div>
+        </div>
+
+        <!-- CATEGORIAS -->
+        <div id="categorias" class="tab-content">
+            <div class="glass-card">
+                <h3 style="margin-bottom: 20px; font-size: 1.3rem;">📂 Gerenciar Categorias</h3>
+                <p style="color: var(--text-dim); margin-bottom: 20px;">
+                    Crie categorias personalizadas para organizar suas despesas. Escolha um emoji e um nome descritivo.
+                </p>
+                <div style="display: grid; grid-template-columns: auto 2fr auto; gap: 15px; align-items: end;">
+                    <div>
+                        <label style="font-size:0.75rem; color:var(--accent); display:block; margin-bottom:8px;">EMOJI</label>
+                        <input type="text" id="categoryIcon" placeholder="🏠" maxlength="2" style="text-align: center; font-size: 1.5rem; width: 60px;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.75rem; color:var(--accent); display:block; margin-bottom:8px;">NOME DA CATEGORIA</label>
+                        <input type="text" id="categoryName" placeholder="Ex: Moradia, Educação, Investimentos">
+                    </div>
+                    <button class="btn-action btn-primary" onclick="addCategory()">+ CRIAR CATEGORIA</button>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="margin-bottom: 20px; font-size: 1.3rem;">📋 Suas Categorias</h3>
+                <div id="categoriesList"></div>
+            </div>
+
+            <div class="glass-card" style="background: rgba(255, 185, 0, 0.05); border: 1px solid rgba(255, 185, 0, 0.3);">
+                <div style="display: flex; gap: 15px; align-items: start;">
+                    <span style="font-size: 2rem;">💡</span>
+                    <div>
+                        <h4 style="color: var(--warning); margin-bottom: 10px;">Dicas para Categorias</h4>
+                        <ul style="color: var(--text-dim); line-height: 1.8; margin-left: 20px;">
+                            <li>Use emojis que representem claramente a categoria</li>
+                            <li>Crie categorias específicas para melhor controle (ex: "Uber" ao invés de só "Transporte")</li>
+                            <li>Categorias customizadas aparecem automaticamente no registro de despesas</li>
+                            <li>Você pode excluir categorias que não usa mais</li>
+                            <li>Despesas já cadastradas mantêm a categoria mesmo se você excluí-la</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DÍVIDAS -->
+        <div id="dividas" class="tab-content">
+            <div class="glass-card">
+                <h3 style="margin-bottom: 20px; font-size: 1.3rem;">+ Criar Dívida Parcelada</h3>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px;">
+                    <input type="text" id="debtName" placeholder="Nome da Dívida (ex: Cartão Nubank)">
+                    <input type="number" id="debtTotal" placeholder="Valor Total R$">
+                    <input type="number" id="debtQty" value="1" placeholder="Nº Parcelas">
+                    <button class="btn-action btn-primary" onclick="addDebtMaster()">CRIAR</button>
+                </div>
+            </div>
+            <div id="mainDebtList"></div>
+        </div>
+
+        <!-- METAS -->
+        <div id="metas" class="tab-content">
+            <div class="glass-card">
+                <h3 style="margin-bottom: 20px; font-size: 1.3rem;">🎯 Criar Nova Meta</h3>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 15px;">
+                    <input type="text" id="goalName" placeholder="Nome da Meta (ex: Viagem Europa)">
+                    <input type="number" id="goalTarget" placeholder="Valor Alvo R$">
+                    <input type="number" id="goalCurrent" placeholder="Valor Atual R$" value="0">
+                    <select id="goalIcon">
+                        <option value="✈️">✈️ Viagem</option>
+                        <option value="🏠">🏠 Casa</option>
+                        <option value="🚗">🚗 Carro</option>
+                        <option value="💍">💍 Casamento</option>
+                        <option value="🎓">🎓 Educação</option>
+                        <option value="💰">💰 Reserva</option>
+                        <option value="📱">📱 Eletrônico</option>
+                        <option value="🎮">🎮 Hobby</option>
+                    </select>
+                    <button class="btn-action btn-primary" onclick="addGoal()">CRIAR</button>
+                </div>
+            </div>
+            <div id="goalsList"></div>
+        </div>
+
+        <!-- INSIGHTS AI -->
+        <div id="insights" class="tab-content">
+            <div class="insights-section">
+                <h2 style="color:var(--accent); margin-bottom:25px; font-size: 1.5rem;">💡 Insights Inteligentes</h2>
+                <div id="insightsList"></div>
+            </div>
+        </div>
+
+        <!-- PREVISÃO -->
+        <div id="previsao" class="tab-content">
+            <div class="glass-card">
+                <h3 style="color:var(--accent); margin-bottom:20px; font-size: 1.3rem;">📈 Previsão de Fluxo de Caixa (6 Meses)</h3>
+                <div id="forecastContainer"></div>
+            </div>
+            <div class="glass-card">
+                <h3 style="color:var(--accent); margin-bottom:20px; font-size: 1.3rem;">📊 Gráfico de Tendências</h3>
+                <div class="chart-container"><canvas id="forecastChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- CALENDÁRIO -->
+        <div id="calendario" class="tab-content">
+            <div class="glass-card">
+                <h3 style="color:var(--accent); margin-bottom:20px; font-size: 1.3rem;">📅 Calendário Financeiro</h3>
+                <div id="calendarView"></div>
+            </div>
+        </div>
+
+    <!-- Notificação -->
+    <div id="notification" class="notification">
+        <div class="notification-header">
+            <span class="notification-icon" id="notifIcon">✅</span>
+            <strong id="notifTitle">Sucesso!</strong>
+        </div>
+        <p id="notifMessage">Operação realizada com sucesso</p>
+    </div>
+
+    <script>
+        let monthChart = null;
+        let forecastChart = null;
+        let annualChart = null;
+        let categoriesChart = null;
+
+        let data = JSON.parse(localStorage.getItem('NexusFinancePro2026')) || {
+            currentMonth: "2026-01",
+            dividasMasters: [],
+            receitas: [],
+            despesas: [],
+            goals: [],
+            customCategories: [
+                {id: 1, icon: '🏠', name: 'Moradia'},
+                {id: 2, icon: '🛒', name: 'Mercado'},
+                {id: 3, icon: '🍕', name: 'Alimentação'},
+                {id: 4, icon: '🚗', name: 'Transporte'},
+                {id: 5, icon: '💊', name: 'Saúde'},
+                {id: 6, icon: '📱', name: 'Assinaturas'},
+                {id: 7, icon: '🎮', name: 'Lazer'},
+                {id: 8, icon: '👕', name: 'Vestuário'},
+                {id: 9, icon: '📊', name: 'Outros'}
+            ],
+            theme: 'dark'
+        };
+
+        const mesesNomes = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+
+        // Tema
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            document.getElementById('themeIcon').textContent = newTheme === 'dark' ? '🌙' : '☀️';
+            data.theme = newTheme;
+            save();
+        }
+
+        // Inicializar tema
+        if (data.theme) {
+            document.body.setAttribute('data-theme', data.theme);
+            document.getElementById('themeIcon').textContent = data.theme === 'dark' ? '🌙' : '☀️';
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        function askPredefined(question) {
+            document.getElementById('userQuestion').value = question;
+            askAssistant();
+        }
+
+        function askAssistant() {
+            const question = document.getElementById('userQuestion').value.trim();
+            
+            if (!question) {
+                showNotification('Atenção', 'Digite uma pergunta primeiro', '⚠️');
+                return;
+            }
+
+            // Adicionar pergunta do usuário no chat
+            addChatMessage('user', question);
+            
+            // Limpar campo
+            document.getElementById('userQuestion').value = '';
+            
+            // Simular "digitando..."
+            const typingId = addChatMessage('ai', '✍️ Analisando seus dados...');
+            
+            // Processar pergunta após 1 segundo
+            setTimeout(() => {
+                const answer = processQuestion(question);
+                removeChatMessage(typingId);
+                addChatMessage('ai', answer);
+            }, 1000);
+        }
+
+        function addChatMessage(type, content) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageId = 'msg-' + Date.now();
+            
+            if (type === 'user') {
+                const messageDiv = document.createElement('div');
+                messageDiv.id = messageId;
+                messageDiv.className = 'user-message';
+                messageDiv.innerHTML = `
+                    <div style="display: flex; gap: 12px; align-items: start; justify-content: flex-end;">
+                        <div style="flex: 1; max-width: 80%;">
+                            <div style="background: linear-gradient(135deg, var(--accent), var(--success)); padding: 15px; border-radius: 8px; color: #000; font-weight: 500;">
+                                ${content}
+                            </div>
+                        </div>
+                        <span style="font-size: 1.5rem;">👤</span>
+                    </div>
+                `;
+                messagesContainer.appendChild(messageDiv);
+            } else {
+                const messageDiv = document.createElement('div');
+                messageDiv.id = messageId;
+                messageDiv.className = 'ai-message';
+                messageDiv.innerHTML = `
+                    <div style="display: flex; gap: 12px; align-items: start;">
+                        <span style="font-size: 1.5rem;">🤖</span>
+                        <div style="flex: 1;">
+                            <div style="background: rgba(0, 242, 255, 0.1); border-left: 3px solid var(--accent); padding: 15px; border-radius: 8px; line-height: 1.6;">
+                                ${content}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                messagesContainer.appendChild(messageDiv);
+            }
+            
+            // Scroll para última mensagem
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            return messageId;
+        }
+
+        function removeChatMessage(messageId) {
+            const message = document.getElementById(messageId);
+            if (message) message.remove();
+        }
+
+        function processQuestion(question) {
+            const q = question.toLowerCase();
+            
+            // Calcular dados necessários
+            const cm = data.currentMonth;
+            const recMes = data.receitas.filter(r => r.month === cm).reduce((a,b) => a+b.val, 0);
+            const despMes = data.despesas.filter(d => d.month === cm).reduce((a,b) => a+b.val, 0);
+            const saldoMes = recMes - despMes;
+            const savingsRate = recMes > 0 ? ((saldoMes / recMes) * 100) : 0;
+            
+            const recAnual = data.receitas.reduce((a,b) => a+b.val, 0);
+            const despAnual = data.despesas.reduce((a,b) => a+b.val, 0);
+            const saldoAnual = recAnual - despAnual;
+            
+            const totalDividas = data.dividasMasters.reduce((sum, m) => {
+                const pago = data.despesas.filter(d => d.debtId === m.id && d.pago).reduce((a,b) => a+b.val, 0);
+                return sum + Math.max(0, m.total - pago);
+            }, 0);
+            
+            // Categorias
+            const categorias = {};
+            data.despesas.forEach(d => {
+                const cat = d.categoria || '📊 Outros';
+                categorias[cat] = (categorias[cat] || 0) + d.val;
+            });
+            const topCategoria = Object.entries(categorias).sort((a,b) => b[1] - a[1])[0];
+            
+            // Responder com base na pergunta
+            if (q.includes('situação') || q.includes('situacao') || q.includes('como estou') || q.includes('balanço') || q.includes('balanco')) {
+                return `
+                    <strong style="color: var(--accent);">📊 Análise da Sua Situação Financeira</strong><br><br>
+                    
+                    <strong>Mês Atual (${mesesNomes[parseInt(cm.split('-')[1])-1]}):</strong><br>
+                    💰 Receitas: R$ ${recMes.toFixed(2)}<br>
+                    💸 Despesas: R$ ${despMes.toFixed(2)}<br>
+                    ${saldoMes >= 0 ? '✅' : '⚠️'} Saldo: R$ ${saldoMes.toFixed(2)}<br>
+                    📊 Taxa de Poupança: ${savingsRate.toFixed(1)}%<br><br>
+                    
+                    <strong>Ano Completo:</strong><br>
+                    💰 Total Recebido: R$ ${recAnual.toFixed(2)}<br>
+                    💸 Total Gasto: R$ ${despAnual.toFixed(2)}<br>
+                    ${saldoAnual >= 0 ? '✅' : '⚠️'} Saldo Acumulado: R$ ${saldoAnual.toFixed(2)}<br><br>
+                    
+                    ${totalDividas > 0 ? `🏦 Dívidas Pendentes: R$ ${totalDividas.toFixed(2)}<br><br>` : ''}
+                    
+                    <strong style="color: ${savingsRate >= 20 ? 'var(--success)' : savingsRate >= 10 ? 'var(--warning)' : 'var(--danger)'};">
+                        ${savingsRate >= 20 ? '🎉 Excelente! Você está economizando bem!' : savingsRate >= 10 ? '👍 Está no caminho certo, mas pode melhorar!' : '⚠️ Atenção! Sua taxa de poupança está baixa.'}
+                    </strong>
+                `;
+            }
+            
+            else if (q.includes('economizar') || q.includes('poupar') || q.includes('gastar menos')) {
+                const topCat = topCategoria ? topCategoria[0] : 'Nenhuma';
+                const topVal = topCategoria ? topCategoria[1] : 0;
+                const topPerc = despAnual > 0 ? ((topVal / despAnual) * 100) : 0;
+                
+                return `
+                    <strong style="color: var(--accent);">💰 Dicas para Economizar Mais</strong><br><br>
+                    
+                    <strong>1. Reduza Gastos na Categoria Principal:</strong><br>
+                    Sua categoria com maior gasto é <strong>${topCat}</strong> com R$ ${topVal.toFixed(2)} (${topPerc.toFixed(1)}% do total).<br>
+                    💡 Tente reduzir 10-20% nesta categoria.<br><br>
+                    
+                    <strong>2. Aumente sua Taxa de Poupança:</strong><br>
+                    Atualmente você poupa ${savingsRate.toFixed(1)}% da renda.<br>
+                    🎯 Meta ideal: 20% ou mais.<br>
+                    💡 Se aumentar para 20%, economizará R$ ${(recMes * 0.2).toFixed(2)}/mês.<br><br>
+                    
+                    <strong>3. Revise Assinaturas e Gastos Fixos:</strong><br>
+                    💡 Cancele serviços que não usa.<br>
+                    💡 Negocie valores de planos (internet, celular).<br><br>
+                    
+                    <strong>4. Planeje Gastos Variáveis:</strong><br>
+                    💡 Defina um limite mensal para cada categoria.<br>
+                    💡 Use o sistema de metas para controlar melhor.<br><br>
+                    
+                    ${totalDividas > 0 ? `<strong>5. Priorize Quitar Dívidas:</strong><br>
+                    Você tem R$ ${totalDividas.toFixed(2)} em dívidas.<br>
+                    💡 Quanto antes quitar, menos juros pagará!<br><br>` : ''}
+                    
+                    <strong style="color: var(--success);">✨ Pequenas mudanças geram grandes resultados!</strong>
+                `;
+            }
+            
+            else if (q.includes('dívida') || q.includes('divida') || q.includes('quitar') || q.includes('pagar')) {
+                if (data.dividasMasters.length === 0) {
+                    return `
+                        <strong style="color: var(--success);">🎉 Parabéns!</strong><br><br>
+                        Você não tem dívidas cadastradas no sistema!<br><br>
+                        Continue assim e mantenha suas finanças saudáveis! 💪
+                    `;
+                }
+                
+                let analise = '<strong style="color: var(--accent);">🏦 Análise de Dívidas</strong><br><br>';
+                
+                data.dividasMasters.forEach(m => {
+                    const pago = data.despesas.filter(d => d.debtId === m.id && d.pago).reduce((a,b) => a+b.val, 0);
+                    const restante = Math.max(0, m.total - pago);
+                    const perc = ((pago / m.total) * 100);
+                    const pendentes = data.despesas.filter(d => d.debtId === m.id && !d.pago).length;
+                    
+                    analise += `<strong>${m.name}:</strong><br>`;
+                    analise += `💰 Total: R$ ${m.total.toFixed(2)}<br>`;
+                    analise += `✅ Pago: R$ ${pago.toFixed(2)} (${perc.toFixed(1)}%)<br>`;
+                    analise += `⏳ Restante: R$ ${restante.toFixed(2)}<br>`;
+                    analise += `📋 Parcelas pendentes: ${pendentes}<br><br>`;
+                });
+                
+                analise += `<strong style="color: var(--warning);">💡 Dica:</strong><br>`;
+                analise += `Se você conseguir pagar R$ ${(totalDividas / 12).toFixed(2)}/mês, quitará tudo em ~12 meses!<br><br>`;
+                analise += `<strong style="color: var(--success);">Continue pagando em dia! 💪</strong>`;
+                
+                return analise;
+            }
+            
+            else if (q.includes('categoria') || q.includes('onde') || q.includes('mais gasto')) {
+                if (!topCategoria) {
+                    return 'Você ainda não tem despesas cadastradas para analisar.';
+                }
+                
+                const top3 = Object.entries(categorias).sort((a,b) => b[1] - a[1]).slice(0, 3);
+                
+                let resposta = '<strong style="color: var(--accent);">📂 Suas Categorias de Maior Gasto</strong><br><br>';
+                
+                top3.forEach((cat, idx) => {
+                    const perc = (cat[1] / despAnual) * 100;
+                    resposta += `<strong>${idx + 1}. ${cat[0]}</strong><br>`;
+                    resposta += `💸 R$ ${cat[1].toFixed(2)} (${perc.toFixed(1)}% do total)<br><br>`;
+                });
+                
+                resposta += `<strong style="color: var(--warning);">💡 Dica:</strong><br>`;
+                resposta += `Focar em reduzir a categoria #1 pode gerar grande economia!`;
+                
+                return resposta;
+            }
+            
+            else if (q.includes('meta') || q.includes('objetivo')) {
+                if (data.goals.length === 0) {
+                    return `
+                        Você ainda não criou nenhuma meta financeira!<br><br>
+                        💡 Crie metas na aba <strong>🎯 Metas</strong> para ter objetivos claros de economia.
+                    `;
+                }
+                
+                let resposta = '<strong style="color: var(--accent);">🎯 Progresso das Suas Metas</strong><br><br>';
+                
+                data.goals.forEach(g => {
+                    const perc = (g.current / g.target) * 100;
+                    const falta = g.target - g.current;
+                    const status = perc >= 100 ? '🎉' : perc >= 75 ? '🔥' : perc >= 50 ? '👍' : '⏳';
+                    
+                    resposta += `${status} <strong>${g.icon} ${g.name}</strong><br>`;
+                    resposta += `📊 Progresso: ${perc.toFixed(1)}%<br>`;
+                    resposta += `💰 Atual: R$ ${g.current.toFixed(2)} / R$ ${g.target.toFixed(2)}<br>`;
+                    resposta += `⏳ Faltam: R$ ${falta.toFixed(2)}<br><br>`;
+                });
+                
+                return resposta;
+            }
+            
+            else if (q.includes('dica') || q.includes('conselho') || q.includes('sugest')) {
+                return `
+                    <strong style="color: var(--accent);">✨ 3 Dicas Personalizadas para Você</strong><br><br>
+                    
+                    <strong>1. ${savingsRate < 15 ? 'Aumente sua Taxa de Poupança' : 'Mantenha sua Disciplina'}:</strong><br>
+                    ${savingsRate < 15 ? 
+                        `Você está poupando ${savingsRate.toFixed(1)}%. Tente chegar a 20% economizando R$ ${((recMes * 0.2) - (recMes * (savingsRate/100))).toFixed(2)} a mais por mês.` :
+                        `Parabéns! Sua taxa de ${savingsRate.toFixed(1)}% está excelente! Continue assim! 🎉`
+                    }<br><br>
+                    
+                    <strong>2. ${totalDividas > 0 ? 'Priorize Quitar Dívidas' : 'Crie uma Reserva de Emergência'}:</strong><br>
+                    ${totalDividas > 0 ?
+                        `Você tem R$ ${totalDividas.toFixed(2)} em dívidas. Foque em quitá-las para economizar em juros!` :
+                        `Como não tem dívidas, foque em construir uma reserva de 6 meses de despesas (R$ ${(despMes * 6).toFixed(2)}).`
+                    }<br><br>
+                    
+                    <strong>3. Revise Gastos da Categoria ${topCategoria ? topCategoria[0] : 'Principal'}:</strong><br>
+                    ${topCategoria ? 
+                        `Esta categoria representa ${((topCategoria[1] / despAnual) * 100).toFixed(1)}% dos seus gastos. Há espaço para otimizar?` :
+                        `Cadastre mais despesas para ter análises mais precisas!`
+                    }
+                `;
+            }
+            
+            else if (q.includes('como usar') || q.includes('ajuda') || q.includes('tutorial')) {
+                return `
+                    <strong style="color: var(--accent);">📚 Como Usar o Nexus Finance</strong><br><br>
+                    
+                    <strong>1. Dashboard:</strong> Visão geral do mês atual<br>
+                    <strong>2. Resumo Anual:</strong> Análise completa do ano<br>
+                    <strong>3. Receitas:</strong> Cadastre suas fontes de renda<br>
+                    <strong>4. Despesas:</strong> Registre todos os gastos<br>
+                    <strong>5. Categorias:</strong> Crie categorias personalizadas<br>
+                    <strong>6. Dívidas:</strong> Gerencie parcelamentos<br>
+                    <strong>7. Metas:</strong> Defina objetivos financeiros<br><br>
+                    
+                    <strong style="color: var(--success);">💡 Dica:</strong> Quanto mais dados cadastrar, melhores serão as análises da IA!
+                `;
+            }
+            
+            // Resposta padrão
+            return `
+                Desculpe, não entendi completamente sua pergunta. 🤔<br><br>
+                
+                Aqui está um resumo rápido da sua situação:<br>
+                💰 Receitas do mês: R$ ${recMes.toFixed(2)}<br>
+                💸 Despesas do mês: R$ ${despMes.toFixed(2)}<br>
+                📊 Taxa de poupança: ${savingsRate.toFixed(1)}%<br><br>
+                
+                <strong>Tente perguntar:</strong><br>
+                • "Qual é minha situação financeira?"<br>
+                • "Como posso economizar mais?"<br>
+                • "Quando vou quitar minhas dívidas?"<br>
+                • "Qual categoria eu mais gasto?"
+            `;
+        }
+
+        function init() {
+            // Migrar categorias antigas para o novo formato
+            if (!data.customCategories) {
+                data.customCategories = [
+                    {id: 1, icon: '🏠', name: 'Moradia'},
+                    {id: 2, icon: '🛒', name: 'Mercado'},
+                    {id: 3, icon: '🍕', name: 'Alimentação'},
+                    {id: 4, icon: '🚗', name: 'Transporte'},
+                    {id: 5, icon: '💊', name: 'Saúde'},
+                    {id: 6, icon: '📱', name: 'Assinaturas'},
+                    {id: 7, icon: '🎮', name: 'Lazer'},
+                    {id: 8, icon: '👕', name: 'Vestuário'},
+                    {id: 9, icon: '📊', name: 'Outros'}
+                ];
+                save();
+            }
+            
+            render();
+            setupTabs();
+            generateInsights();
+            generateForecast();
+            checkAlerts();
+        }
+
+        function save() {
+            localStorage.setItem('NexusFinancePro2026', JSON.stringify(data));
+        }
+
+        function setupTabs() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-btn, .tab-content').forEach(el => el.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(btn.dataset.tab).classList.add('active');
+                    if (btn.dataset.tab === 'dashboard') renderMonthChart();
+                    if (btn.dataset.tab === 'resumo-anual') renderAnnualDashboard();
+                    if (btn.dataset.tab === 'previsao') renderForecastChart();
+                    if (btn.dataset.tab === 'calendario') renderCalendar();
+                });
+            });
+        }
+
+        function changeMonth(diff) {
+            let [y, m] = data.currentMonth.split('-').map(Number);
+            m += diff;
+            if (m > 12) { m = 1; y++; }
+            if (m < 1) { m = 12; y--; }
+            data.currentMonth = `${y}-${String(m).padStart(2,'0')}`;
+            save();
+            render();
+        }
+
+        function showNotification(title, message, icon = '✅') {
+            const notif = document.getElementById('notification');
+            document.getElementById('notifTitle').textContent = title;
+            document.getElementById('notifMessage').textContent = message;
+            document.getElementById('notifIcon').textContent = icon;
+            notif.classList.add('show');
+            setTimeout(() => notif.classList.remove('show'), 4000);
+        }
+
+        function addDebtMaster() {
+            const name = document.getElementById('debtName').value.trim();
+            const total = parseFloat(document.getElementById('debtTotal').value);
+            const qty = parseInt(document.getElementById('debtQty').value);
+
+            if (!name || isNaN(total) || total <= 0 || qty < 1) {
+                showNotification('Erro', 'Preencha todos os campos corretamente', '❌');
+                return;
+            }
+
+            const debtId = Date.now();
+            data.dividasMasters.push({ id: debtId, name, total });
+
+            const valParc = Math.floor((total / qty) * 100) / 100;
+            const valUltima = (total - (valParc * (qty - 1))).toFixed(2);
+
+            let [y, m] = data.currentMonth.split('-').map(Number);
+            for (let i = 0; i < qty; i++) {
+                let currentVal = (i === qty - 1) ? parseFloat(valUltima) : valParc;
+                let pM = m + i; let pY = y;
+                while (pM > 12) { pM -= 12; pY++; }
+                data.despesas.push({
+                    id: Date.now() + i + Math.random()*1000,
+                    month: `${pY}-${String(pM).padStart(2,'0')}`,
+                    desc: `${name} (${i+1}/${qty})`,
+                    val: currentVal,
+                    tipo: 'Amortização',
+                    categoria: '🏦 Dívida',
+                    pago: false,
+                    debtId: debtId
+                });
+            }
+
+            document.getElementById('debtName').value = '';
+            document.getElementById('debtTotal').value = '';
+            document.getElementById('debtQty').value = '1';
+
+            showNotification('Sucesso', `Dívida "${name}" criada com ${qty} parcelas`, '🏦');
+            save();
+            render();
+        }
+
+        function rebalanceDebt(debtId) {
+            const master = data.dividasMasters.find(m => m.id === debtId);
+            if (!master) return;
+
+            const pago = data.despesas.filter(d => d.debtId === debtId && d.pago).reduce((sum, d) => sum + d.val, 0);
+            const restante = master.total - pago;
+
+            const pendentes = data.despesas.filter(d => d.debtId === debtId && !d.pago).sort((a,b) => a.month.localeCompare(b.month));
+
+            if (restante <= 0) {
+                data.despesas = data.despesas.filter(d => !(d.debtId === debtId && !d.pago));
+            } else if (pendentes.length > 0) {
+                const novoParc = Math.floor((restante / pendentes.length) * 100) / 100;
+                const somaAtePenultima = novoParc * (pendentes.length - 1);
+                const ultima = (restante - somaAtePenultima).toFixed(2);
+
+                pendentes.forEach((p, idx) => {
+                    p.val = (idx === pendentes.length - 1) ? parseFloat(ultima) : novoParc;
+                });
+            }
+
+            save();
+            render();
+        }
+
+        function addItem(type) {
+            if (type === 'receitas') {
+                const desc = document.getElementById('recDesc').value.trim();
+                const val = parseFloat(document.getElementById('recVal').value);
+
+                if (!desc || isNaN(val) || val <= 0) {
+                    showNotification('Erro', 'Preencha todos os campos corretamente', '❌');
+                    return;
+                }
+
+                data.receitas.push({ id: Date.now(), month: data.currentMonth, desc, val });
+
+                document.getElementById('recDesc').value = '';
+                document.getElementById('recVal').value = '';
+                showNotification('Receita Adicionada', `${desc}: R$ ${val.toFixed(2)}`, '💰');
+            }
+            else if (type === 'despesas') {
+                const desc = document.getElementById('despDesc').value.trim();
+                const val = parseFloat(document.getElementById('despVal').value);
+                const tipo = document.getElementById('despTipo').value;
+                const categoria = document.getElementById('despCategoria').value;
+                const pago = document.getElementById('despPago').value === 'sim';
+
+                if (!desc || isNaN(val) || val <= 0) {
+                    showNotification('Erro', 'Preencha todos os campos corretamente', '❌');
+                    return;
+                }
+
+                if (tipo === 'Fixa') {
+                    for (let mm = 1; mm <= 12; mm++) {
+                        const monthStr = `2026-${String(mm).padStart(2,'0')}`;
+                        data.despesas.push({
+                            id: Date.now() + mm + Math.random()*1000,
+                            month: monthStr,
+                            desc: desc + " (Fixa)",
+                            val: val,
+                            tipo: 'Fixa',
+                            categoria: categoria,
+                            pago: pago
+                        });
+                    }
+                    showNotification('Despesa Fixa Criada', `${desc} replicada para 12 meses`, '📌');
+                } else {
+                    const item = { id: Date.now(), month: data.currentMonth, desc, val, tipo, categoria, pago };
+
+                    if (tipo === 'Amortização') {
+                        const debtId = parseInt(document.getElementById('despDebtLink').value);
+                        if (!isNaN(debtId)) item.debtId = debtId;
+                    }
+
+                    data.despesas.push(item);
+
+                    if (tipo === 'Amortização' && item.debtId) rebalanceDebt(item.debtId);
+                    showNotification('Despesa Adicionada', `${desc}: R$ ${val.toFixed(2)}`, '📉');
+                }
+
+                document.getElementById('despDesc').value = '';
+                document.getElementById('despVal').value = '';
+                document.getElementById('despTipo').value = 'Variável';
+                document.getElementById('despPago').value = 'não';
+                document.getElementById('debtSelectGroup').style.display = 'none';
+            }
+
+            save();
+            render();
+            generateInsights();
+            generateForecast();
+        }
+
+        function toggleDebtSelect() {
+            const tipo = document.getElementById('despTipo').value;
+            document.getElementById('debtSelectGroup').style.display = (tipo === 'Amortização') ? 'block' : 'none';
+            if (tipo === 'Amortização') {
+                const sel = document.getElementById('despDebtLink');
+                sel.innerHTML = data.dividasMasters.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+                if (data.dividasMasters.length === 0) sel.innerHTML = '<option value="">Nenhuma dívida cadastrada</option>';
+            }
+        }
+
+        function editReceita(id) {
+            const item = data.receitas.find(r => r.id === id);
+            if (!item) {
+                showNotification('Erro', 'Receita não encontrada', '❌');
+                return;
+            }
+
+            const novaDesc = prompt('Nova descrição:', item.desc);
+            if (novaDesc === null) return;
+
+            const novoValorStr = prompt('Novo valor (use ponto ou vírgula):', item.val.toFixed(2));
+            if (novoValorStr === null) return;
+
+            const novoValor = parseFloat(novoValorStr.replace(',', '.'));
+
+            if (isNaN(novoValor) || novoValor <= 0) {
+                showNotification('Erro', 'Valor inválido', '❌');
+                return;
+            }
+
+            item.desc = novaDesc.trim();
+            item.val = novoValor;
+
+            save();
+            render();
+            generateInsights();
+            generateForecast();
+            showNotification('Receita Atualizada', `${item.desc}: R$ ${item.val.toFixed(2)}`, '✏️');
+        }
+
+        function editDespesa(id) {
+            const item = data.despesas.find(d => d.id === id);
+            if (!item) {
+                showNotification('Erro', 'Despesa não encontrada', '❌');
+                return;
+            }
+
+            const novaDesc = prompt('Nova descrição:', item.desc);
+            if (novaDesc === null) return;
+
+            const novoValorStr = prompt('Novo valor (use ponto ou vírgula):', item.val.toFixed(2));
+            if (novoValorStr === null) return;
+
+            const novoValor = parseFloat(novoValorStr.replace(',', '.'));
+
+            if (isNaN(novoValor) || novoValor <= 0) {
+                showNotification('Erro', 'Valor inválido', '❌');
+                return;
+            }
+
+            item.desc = novaDesc.trim();
+            item.val = novoValor;
+
+            save();
+            render();
+            if (item.tipo === 'Amortização' && item.debtId) rebalanceDebt(item.debtId);
+            generateInsights();
+            generateForecast();
+            checkAlerts();
+            showNotification('Despesa Atualizada', `${item.desc}: R$ ${item.val.toFixed(2)}`, '✏️');
+        }
+
+        function togglePago(id) {
+            const item = data.despesas.find(d => d.id === id);
+            if (!item) return;
+
+            if (item.pago) {
+                // Se já está pago, perguntar se quer marcar como pendente
+                if (confirm(`Marcar "${item.desc}" como pendente novamente?`)) {
+                    item.pago = false;
+                    showNotification('Marcado como Pendente', `${item.desc}`, '⏳');
+                }
+            } else {
+                // Se está pendente, solicitar confirmação do valor pago
+                const valorAtual = item.val.toFixed(2);
+                const confirmacao = prompt(
+                    `Confirmar pagamento de "${item.desc}"\n\n` +
+                    `Valor original: R$ ${valorAtual}\n` +
+                    `Digite o valor pago (ou confirme com ENTER):`,
+                    valorAtual
+                );
+                
+                if (confirmacao === null) return; // Usuário cancelou
+                
+                const valorPago = parseFloat(confirmacao.replace(',', '.'));
+                
+                if (isNaN(valorPago) || valorPago <= 0) {
+                    showNotification('Erro', 'Valor inválido. Pagamento não confirmado.', '❌');
+                    return;
+                }
+                
+                // Atualiza o valor se foi diferente do original
+                if (valorPago !== item.val) {
+                    const diferenca = (valorPago - item.val).toFixed(2);
+                    const sinal = diferenca > 0 ? '+' : '';
+                    item.val = valorPago;
+                    showNotification(
+                        'Pagamento Confirmado', 
+                        `${item.desc}: R$ ${valorPago.toFixed(2)} (${sinal}R$ ${diferenca})`,
+                        '✅'
+                    );
+                } else {
+                    showNotification('Pagamento Confirmado', `${item.desc}: R$ ${valorPago.toFixed(2)}`, '✅');
+                }
+                
+                item.pago = true;
+            }
+            
+            save();
+            if (item.tipo === 'Amortização' && item.debtId) rebalanceDebt(item.debtId);
+            render();
+            generateInsights();
+            generateForecast();
+            checkAlerts();
+        }
+
+        function deleteItem(type, id) {
+            if (!confirm("Excluir este item?")) return;
+            data[type] = data[type].filter(x => x.id !== id);
+            save();
+            render();
+            showNotification('Item Excluído', 'Item removido com sucesso', '🗑️');
+        }
+
+        function deleteDebtMaster(id) {
+            if (!confirm("Remover dívida e todas as parcelas associadas?")) return;
+            data.dividasMasters = data.dividasMasters.filter(m => m.id !== id);
+            data.despesas = data.despesas.filter(d => d.debtId !== id);
+            save();
+            render();
+            showNotification('Dívida Removida', 'Dívida e parcelas excluídas', '🗑️');
+        }
+
+        function addGoal() {
+            const name = document.getElementById('goalName').value.trim();
+            const target = parseFloat(document.getElementById('goalTarget').value);
+            const current = parseFloat(document.getElementById('goalCurrent').value) || 0;
+            const icon = document.getElementById('goalIcon').value;
+
+            if (!name || isNaN(target) || target <= 0) {
+                showNotification('Erro', 'Preencha todos os campos corretamente', '❌');
+                return;
+            }
+
+            data.goals.push({ id: Date.now(), name, target, current, icon });
+            
+            document.getElementById('goalName').value = '';
+            document.getElementById('goalTarget').value = '';
+            document.getElementById('goalCurrent').value = '0';
+            
+            save();
+            render();
+            showNotification('Meta Criada', `${name}: R$ ${target.toFixed(2)}`, icon);
+        }
+
+        function updateGoal(id, newValue) {
+            const goal = data.goals.find(g => g.id === id);
+            if (!goal) return;
+            
+            goal.current = parseFloat(newValue);
+            save();
+            render();
+            
+            if (goal.current >= goal.target) {
+                showNotification('🎉 Meta Atingida!', `Parabéns! Você atingiu a meta "${goal.name}"`, '🎉');
+            }
+        }
+
+        function deleteGoal(id) {
+            if (!confirm("Excluir esta meta?")) return;
+            data.goals = data.goals.filter(g => g.id !== id);
+            save();
+            render();
+            showNotification('Meta Excluída', 'Meta removida com sucesso', '🗑️');
+        }
+
+        function addCategory() {
+            const icon = document.getElementById('categoryIcon').value.trim();
+            const name = document.getElementById('categoryName').value.trim();
+
+            if (!icon || !name) {
+                showNotification('Erro', 'Preencha o emoji e o nome da categoria', '❌');
+                return;
+            }
+
+            // Verificar se já existe
+            const exists = data.customCategories.some(c => 
+                c.name.toLowerCase() === name.toLowerCase()
+            );
+
+            if (exists) {
+                showNotification('Erro', 'Já existe uma categoria com este nome', '⚠️');
+                return;
+            }
+
+            const newCategory = {
+                id: Date.now(),
+                icon: icon,
+                name: name
+            };
+
+            data.customCategories.push(newCategory);
+            
+            document.getElementById('categoryIcon').value = '';
+            document.getElementById('categoryName').value = '';
+
+            save();
+            renderCategories();
+            updateCategoriesInSelect();
+            showNotification('Categoria Criada', `${icon} ${name}`, '✅');
+        }
+
+        function deleteCategory(id) {
+            const category = data.customCategories.find(c => c.id === id);
+            if (!category) return;
+
+            // Contar quantas despesas usam esta categoria
+            const categoryLabel = `${category.icon} ${category.name}`;
+            const usageCount = data.despesas.filter(d => d.categoria === categoryLabel).length;
+
+            let confirmMsg = `Excluir categoria "${category.icon} ${category.name}"?`;
+            if (usageCount > 0) {
+                confirmMsg += `\n\n⚠️ Esta categoria é usada em ${usageCount} despesa(s).\nAs despesas manterão o nome da categoria mesmo após exclusão.`;
+            }
+
+            if (!confirm(confirmMsg)) return;
+
+            data.customCategories = data.customCategories.filter(c => c.id !== id);
+            
+            save();
+            renderCategories();
+            updateCategoriesInSelect();
+            showNotification('Categoria Excluída', `${category.icon} ${category.name}`, '🗑️');
+        }
+
+        function renderCategories() {
+            if (!data.customCategories || data.customCategories.length === 0) {
+                document.getElementById('categoriesList').innerHTML = `
+                    <p style="text-align: center; color: var(--text-dim); padding: 40px;">
+                        Nenhuma categoria cadastrada ainda.<br>
+                        Crie sua primeira categoria acima!
+                    </p>
+                `;
+                return;
+            }
+
+            const html = data.customCategories.map(cat => {
+                const categoryLabel = `${cat.icon} ${cat.name}`;
+                const usageCount = data.despesas.filter(d => d.categoria === categoryLabel).length;
+
+                return `
+                    <div style="display: grid; grid-template-columns: auto 1fr auto auto; gap: 20px; align-items: center; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;" onmouseover="this.style.background='rgba(0,242,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <div style="font-size: 2rem; min-width: 50px; text-align: center;">
+                            ${cat.icon}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 1.1rem; color: var(--text-main); margin-bottom: 3px;">
+                                ${cat.name}
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--text-dim);">
+                                ${usageCount > 0 ? `Usada em ${usageCount} despesa(s)` : 'Ainda não utilizada'}
+                            </div>
+                        </div>
+                        <div style="font-family: 'Orbitron', sans-serif; color: var(--accent); font-weight: 700; font-size: 0.9rem;">
+                            ${cat.icon} ${cat.name}
+                        </div>
+                        <button class="btn-action" style="background: var(--danger); color: #fff; padding: 10px 16px; border-radius: 6px;" onclick="deleteCategory(${cat.id})" title="Excluir categoria">
+                            🗑️ EXCLUIR
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('categoriesList').innerHTML = html;
+        }
+
+        function updateCategoriesInSelect() {
+            const categoriesGroup = document.getElementById('categoriesGroup');
+            if (categoriesGroup && data.customCategories) {
+                categoriesGroup.innerHTML = data.customCategories.map(c => 
+                    `<option value="${c.icon} ${c.name}">${c.icon} ${c.name}</option>`
+                ).join('');
+            }
+        }
+
+        function updateMetasInCategories() {
+            const metasGroup = document.getElementById('metasCategories');
+            if (metasGroup && data.goals) {
+                metasGroup.innerHTML = data.goals.map(g => 
+                    `<option value="${g.icon} ${g.name}">${g.icon} ${g.name}</option>`
+                ).join('');
+            }
+        }
+
+        function render() {
+            const cm = data.currentMonth;
+            document.getElementById('currentMonth').innerText = `${mesesNomes[parseInt(cm.split('-')[1])-1]} ${cm.split('-')[0]}`;
+
+            const recMes = data.receitas.filter(r => r.month === cm);
+            const despMes = data.despesas.filter(d => d.month === cm);
+
+            const recTotal = recMes.reduce((a,b)=>a+b.val, 0);
+            const despTotal = despMes.reduce((a,b)=>a+b.val, 0);
+            const saldo = recTotal - despTotal;
+            const savingsRate = recTotal > 0 ? ((saldo / recTotal) * 100) : 0;
+
+            document.getElementById('dashRec').innerText = `R$ ${recTotal.toFixed(2)}`;
+            document.getElementById('dashDesp').innerText = `R$ ${despTotal.toFixed(2)}`;
+            document.getElementById('dashSaldo').innerText = `R$ ${saldo.toFixed(2)}`;
+            document.getElementById('savingsRate').innerText = `${savingsRate.toFixed(1)}%`;
+
+            // Atualizar categorias com metas
+            updateMetasInCategories();
+            
+            // Atualizar categorias customizadas no select
+            updateCategoriesInSelect();
+            
+            // Renderizar lista de categorias
+            if (document.getElementById('categoriesList')) {
+                renderCategories();
+            }
+
+            // Renderizar receitas como cards
+            const receitasHtml = recMes.map(r => `
+                <div class="expense-card">
+                    <div class="category-icon">💰</div>
+                    <div class="expense-info">
+                        <h3>${r.desc}</h3>
+                        <p>${mesesNomes[parseInt(r.month.split('-')[1])-1]}</p>
+                    </div>
+                    <div class="expense-amount" style="color:var(--success)">R$ ${r.val.toFixed(2)}</div>
+                    <button class="btn-action" style="background:var(--accent); color:#000; padding:8px 12px; margin-right:8px;" onclick="editReceita(${r.id})">✏️</button>
+                    <button class="btn-action" style="background:var(--danger); color:#fff; padding:8px 12px;" onclick="deleteItem('receitas', ${r.id})">🗑️</button>
+                </div>
+            `).join('');
+            
+            const receitasFooter = `
+                <div class="glass-card" style="margin-top: 0; padding: 20px; background: linear-gradient(135deg, rgba(0, 255, 170, 0.1), rgba(0, 242, 255, 0.1)); border: 2px solid var(--success);">
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; font-weight: 600;">💰 Total Recebido no Mês</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: var(--success); font-family: 'Orbitron', sans-serif;">${recTotal.toFixed(2).replace('.', ',')}</div>
+                            <div style="font-size: 0.9rem; color: var(--text-dim); margin-top: 5px;">Reais</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('receitasList').innerHTML = (receitasHtml || '<p style="text-align:center; color:var(--text-dim); padding:40px;">Nenhuma receita cadastrada este mês</p>') + receitasFooter;
+
+            // Renderizar despesas como tabela
+            const despesasHtml = `
+                <div class="glass-card">
+                    <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--accent);">
+                                <th style="padding: 15px; text-align: left; color: var(--accent); font-weight: 700; text-transform: uppercase; font-size: 0.85rem;">Descrição</th>
+                                <th style="padding: 15px; text-align: left; color: var(--accent); font-weight: 700; text-transform: uppercase; font-size: 0.85rem;">Categoria</th>
+                                <th style="padding: 15px; text-align: right; color: var(--accent); font-weight: 700; text-transform: uppercase; font-size: 0.85rem;">Valor</th>
+                                <th style="padding: 15px; text-align: center; color: var(--accent); font-weight: 700; text-transform: uppercase; font-size: 0.85rem;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${despMes.length > 0 ? despMes.map(d => `
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;" onmouseover="this.style.background='rgba(0,242,255,0.05)'" onmouseout="this.style.background='transparent'">
+                                    <td style="padding: 15px;">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <span style="font-size: 1.5rem;">${d.categoria ? d.categoria.split(' ')[0] : '📊'}</span>
+                                            <div>
+                                                <div style="font-weight: 600; color: var(--text-main); margin-bottom: 3px;">${d.desc}</div>
+                                                <div style="font-size: 0.8rem; color: var(--text-dim);">${d.tipo}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 15px; color: var(--text-dim);">
+                                        ${d.categoria || 'Sem categoria'}
+                                    </td>
+                                    <td style="padding: 15px; text-align: right;">
+                                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--danger); font-family: 'Orbitron', sans-serif;">
+                                            R$ ${d.val.toFixed(2)}
+                                        </div>
+                                    </td>
+                                    <td style="padding: 15px;">
+                                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                            <button class="btn-status ${d.pago?'status-pago':'status-pendente'}" onclick="togglePago(${d.id})" style="min-width: 90px;">
+                                                ${d.pago?'✅ PAGO':'⏳ PENDENTE'}
+                                            </button>
+                                            <button class="btn-action" style="background:var(--accent); color:#000; padding:8px 12px; border-radius: 6px;" onclick="editDespesa(${d.id})" title="Editar">
+                                                ✏️
+                                            </button>
+                                            <button class="btn-action" style="background:var(--danger); color:#fff; padding:8px 12px; border-radius: 6px;" onclick="deleteItem('despesas', ${d.id})" title="Excluir">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('') : `
+                                <tr>
+                                    <td colspan="4" style="padding: 40px; text-align: center; color: var(--text-dim);">
+                                        Nenhuma despesa cadastrada este mês
+                                    </td>
+                                </tr>
+                            `}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            const despesasFooter = `
+                <div class="glass-card" style="margin-top: 0; padding: 20px; background: linear-gradient(135deg, rgba(255, 0, 85, 0.1), rgba(255, 185, 0, 0.1)); border: 2px solid rgba(255, 0, 85, 0.5);">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                        <div style="text-align: center; padding: 15px; border-right: 1px solid rgba(255,255,255,0.1);">
+                            <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; font-weight: 600;">💰 Total Recebido</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--success); font-family: 'Orbitron', sans-serif;">R$ ${recTotal.toFixed(2)}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; border-right: 1px solid rgba(255,255,255,0.1);">
+                            <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; font-weight: 600;">💸 Total Gasto</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--danger); font-family: 'Orbitron', sans-serif;">R$ ${despTotal.toFixed(2)}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px;">
+                            <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; font-weight: 600;">
+                                ${saldo >= 0 ? '✅ Sobra do Mês' : '⚠️ Déficit do Mês'}
+                            </div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: ${saldo >= 0 ? 'var(--accent)' : 'var(--warning)'}; font-family: 'Orbitron', sans-serif;">
+                                R$ ${saldo.toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('despesasList').innerHTML = despesasHtml + despesasFooter;
+
+            renderDebtStatus();
+            renderGoals();
+            renderMonthChart();
+        }
+
+        function renderDebtStatus() {
+            const html = data.dividasMasters.map(m => {
+                const pago = data.despesas.filter(d=>d.debtId===m.id && d.pago).reduce((a,b)=>a+b.val,0);
+                const perc = Math.min(100, (pago / m.total) * 100) || 0;
+                const saldo = Math.max(0, m.total - pago);
+                return `
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <strong>🏦 ${m.name}</strong>
+                            <span>Saldo: R$ ${saldo.toFixed(2)}</span>
+                        </div>
+                        <div class="progress-bg"><div class="progress-fill" style="width:${perc}%"></div></div>
+                        <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--text-dim); margin-top:8px;">
+                            <span>${perc.toFixed(1)}% pago (R$ ${pago.toFixed(2)} de R$ ${m.total.toFixed(2)})</span>
+                            <button onclick="deleteDebtMaster(${m.id})" style="color:var(--danger);background:none;border:none;cursor:pointer; font-weight:600;">REMOVER</button>
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<p style="color:var(--text-dim); text-align:center; padding:30px;">Nenhuma dívida cadastrada</p>';
+
+            document.getElementById('dashboardDebtList').innerHTML = html;
+            document.getElementById('mainDebtList').innerHTML = html;
+        }
+
+        function renderGoals() {
+            const html = data.goals.map(g => {
+                const perc = Math.min(100, (g.current / g.target) * 100);
+                const remaining = g.target - g.current;
+                return `
+                    <div class="goal-card">
+                        <div class="goal-header">
+                            <span class="goal-icon">${g.icon}</span>
+                            <div class="goal-info">
+                                <h3>${g.name}</h3>
+                                <p>Meta: R$ ${g.target.toFixed(2)} • Faltam: R$ ${remaining.toFixed(2)}</p>
+                            </div>
+                        </div>
+                        <div class="progress-bg"><div class="progress-fill" style="width:${perc}%"></div></div>
+                        <div style="display:flex;justify-content:space-between; margin-top:15px; align-items:center; gap:15px;">
+                            <span style="font-size:0.9rem; color:var(--text-dim);">${perc.toFixed(1)}%</span>
+                            <input type="number" step="0.01" value="${g.current}" onchange="updateGoal(${g.id}, this.value)" style="max-width:150px;" placeholder="Valor atual">
+                            <button onclick="deleteGoal(${g.id})" style="color:var(--danger);background:none;border:none;cursor:pointer; font-weight:600;">REMOVER</button>
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<p style="color:var(--text-dim); text-align:center; padding:40px;">Nenhuma meta cadastrada</p>';
+
+            document.getElementById('goalsList').innerHTML = html;
+        }
+
+        function renderAnnualDashboard() {
+            // Calcular totais anuais
+            const receitasAnuais = data.receitas.filter(r => r.month.startsWith('2026'));
+            const despesasAnuais = data.despesas.filter(d => d.month.startsWith('2026'));
+            
+            const recTotal = receitasAnuais.reduce((a,b) => a+b.val, 0);
+            const despTotal = despesasAnuais.reduce((a,b) => a+b.val, 0);
+            const saldoTotal = recTotal - despTotal;
+            const savingsRateAnual = recTotal > 0 ? ((saldoTotal / recTotal) * 100) : 0;
+            
+            document.getElementById('annualRecTotal').innerText = `R$ ${recTotal.toFixed(2)}`;
+            document.getElementById('annualDespTotal').innerText = `R$ ${despTotal.toFixed(2)}`;
+            document.getElementById('annualSaldoTotal').innerText = `R$ ${saldoTotal.toFixed(2)}`;
+            document.getElementById('annualSavingsRate').innerText = `${savingsRateAnual.toFixed(1)}%`;
+            
+            // Preparar dados mensais
+            const monthlyData = [];
+            for (let m = 1; m <= 12; m++) {
+                const monthStr = `2026-${String(m).padStart(2,'0')}`;
+                const recMes = data.receitas.filter(r => r.month === monthStr).reduce((a,b) => a+b.val, 0);
+                const despMes = data.despesas.filter(d => d.month === monthStr).reduce((a,b) => a+b.val, 0);
+                const saldoMes = recMes - despMes;
+                
+                monthlyData.push({
+                    month: mesesNomes[m-1],
+                    receitas: recMes,
+                    despesas: despMes,
+                    saldo: saldoMes
+                });
+            }
+            
+            // Gráfico de evolução anual
+            if (annualChart) annualChart.destroy();
+            
+            const ctxAnnual = document.getElementById('annualChart');
+            if (ctxAnnual) {
+                annualChart = new Chart(ctxAnnual, {
+                    type: 'line',
+                    data: {
+                        labels: mesesNomes,
+                        datasets: [
+                            {
+                                label: 'Receitas',
+                                data: monthlyData.map(m => m.receitas),
+                                borderColor: '#00ffaa',
+                                backgroundColor: 'rgba(0,255,170,0.1)',
+                                tension: 0.4,
+                                fill: true,
+                                borderWidth: 3
+                            },
+                            {
+                                label: 'Despesas',
+                                data: monthlyData.map(m => m.despesas),
+                                borderColor: '#ff0055',
+                                backgroundColor: 'rgba(255,0,85,0.1)',
+                                tension: 0.4,
+                                fill: true,
+                                borderWidth: 3
+                            },
+                            {
+                                label: 'Saldo',
+                                data: monthlyData.map(m => m.saldo),
+                                borderColor: '#00f2ff',
+                                backgroundColor: 'rgba(0,242,255,0.1)',
+                                tension: 0.4,
+                                fill: true,
+                                borderWidth: 3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { 
+                            y: { 
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255,255,255,0.05)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255,255,255,0.05)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { color: '#fff' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Tabela de resumo mensal
+            const breakdownHtml = monthlyData.map((m, idx) => {
+                const monthStr = `2026-${String(idx+1).padStart(2,'0')}`;
+                const isCurrentMonth = monthStr === data.currentMonth;
+                
+                return `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); ${isCurrentMonth ? 'background: rgba(0,242,255,0.1); border-left: 3px solid var(--accent);' : ''}" onmouseover="this.style.background='rgba(0,242,255,0.05)'" onmouseout="this.style.background='${isCurrentMonth ? 'rgba(0,242,255,0.1)' : 'transparent'}'">
+                        <div>
+                            <strong style="color: var(--accent);">${m.month}</strong>
+                            ${isCurrentMonth ? '<span style="margin-left:10px; font-size:0.7rem; background:var(--accent); color:#000; padding:2px 8px; border-radius:4px; font-weight:700;">ATUAL</span>' : ''}
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="color: var(--success); font-weight: 600;">R$ ${m.receitas.toFixed(2)}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="color: var(--danger); font-weight: 600;">R$ ${m.despesas.toFixed(2)}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="color: ${m.saldo >= 0 ? 'var(--accent)' : 'var(--warning)'}; font-weight: 700; font-family: 'Orbitron', sans-serif;">R$ ${m.saldo.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('monthlyBreakdown').innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; padding: 15px; background: rgba(0,242,255,0.1); border-radius: 10px; margin-bottom: 10px; font-weight: 700; text-transform: uppercase; font-size: 0.85rem;">
+                    <div style="color: var(--accent);">Mês</div>
+                    <div style="text-align: right; color: var(--success);">Receitas</div>
+                    <div style="text-align: right; color: var(--danger);">Despesas</div>
+                    <div style="text-align: right; color: var(--accent);">Saldo</div>
+                </div>
+                ${breakdownHtml}
+            `;
+            
+            // Gráfico de pizza por categoria
+            const categorias = {};
+            despesasAnuais.forEach(d => {
+                const cat = d.categoria || '📊 Outros';
+                categorias[cat] = (categorias[cat] || 0) + d.val;
+            });
+            
+            const categoriesData = Object.entries(categorias).sort((a,b) => b[1] - a[1]);
+            
+            if (categoriesChart) categoriesChart.destroy();
+            
+            const ctxCategories = document.getElementById('categoriesChart');
+            if (ctxCategories && categoriesData.length > 0) {
+                const colors = [
+                    '#00ffaa', '#ff0055', '#00f2ff', '#ffb700', '#ff3b30',
+                    '#34c759', '#ff9500', '#af52de', '#ff375f', '#5856d6'
+                ];
+                
+                categoriesChart = new Chart(ctxCategories, {
+                    type: 'doughnut',
+                    data: {
+                        labels: categoriesData.map(c => c[0]),
+                        datasets: [{
+                            data: categoriesData.map(c => c[1]),
+                            backgroundColor: colors.slice(0, categoriesData.length),
+                            borderColor: '#020205',
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { 
+                                    color: '#fff',
+                                    padding: 15,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: R$ ${value.toFixed(2)} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function renderMonthChart() {
+            const cm = data.currentMonth;
+            const recMes = data.receitas.filter(r => r.month === cm).reduce((a,b)=>a+b.val,0);
+            const desMes = data.despesas.filter(d => d.month === cm).reduce((a,b)=>a+b.val,0);
+
+            if (monthChart) monthChart.destroy();
+
+            const ctx = document.getElementById('monthChart');
+            if (!ctx) return;
+
+            monthChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Receitas', 'Despesas', 'Saldo'],
+                    datasets: [{
+                        label: cm,
+                        data: [recMes, desMes, recMes - desMes],
+                        backgroundColor: [
+                            'rgba(0,255,170,0.7)',
+                            'rgba(255,0,85,0.7)',
+                            recMes - desMes >= 0 ? 'rgba(0,242,255,0.7)' : 'rgba(255,185,0,0.7)'
+                        ],
+                        borderColor: ['#00ffaa', '#ff0055', '#00f2ff'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function generateInsights() {
+            const insights = [];
+            const cm = data.currentMonth;
+            const recMes = data.receitas.filter(r => r.month === cm).reduce((a,b)=>a+b.val, 0);
+            const despMes = data.despesas.filter(d => d.month === cm).reduce((a,b)=>a+b.val, 0);
+            const saldo = recMes - despMes;
+
+            // Insight 1: Taxa de poupança
+            const savingsRate = recMes > 0 ? ((saldo / recMes) * 100) : 0;
+            if (savingsRate >= 20) {
+                insights.push({
+                    icon: '🎉',
+                    title: 'Excelente Taxa de Poupança!',
+                    text: `Você está economizando ${savingsRate.toFixed(1)}% da sua renda. Parabéns!`
+                });
+            } else if (savingsRate < 10 && savingsRate > 0) {
+                insights.push({
+                    icon: '⚠️',
+                    title: 'Taxa de Poupança Baixa',
+                    text: `Você está economizando apenas ${savingsRate.toFixed(1)}%. Tente cortar gastos desnecessários.`
+                });
+            }
+
+            // Insight 2: Categoria com maior gasto
+            const categorias = {};
+            data.despesas.filter(d => d.month === cm).forEach(d => {
+                const cat = d.categoria || '📊 Outros';
+                categorias[cat] = (categorias[cat] || 0) + d.val;
+            });
+            
+            const topCategoria = Object.entries(categorias).sort((a,b) => b[1] - a[1])[0];
+            if (topCategoria) {
+                const percCategoria = (topCategoria[1] / despMes) * 100;
+                insights.push({
+                    icon: topCategoria[0].split(' ')[0],
+                    title: 'Categoria de Maior Gasto',
+                    text: `${topCategoria[0]} representa ${percCategoria.toFixed(1)}% (R$ ${topCategoria[1].toFixed(2)}) das suas despesas.`
+                });
+            }
+
+            // Insight 3: Comparação com mês anterior
+            const [y, m] = cm.split('-').map(Number);
+            let lastMonth = m === 1 ? `${y-1}-12` : `${y}-${String(m-1).padStart(2,'0')}`;
+            const despLastMonth = data.despesas.filter(d => d.month === lastMonth).reduce((a,b)=>a+b.val, 0);
+            
+            if (despLastMonth > 0) {
+                const diff = ((despMes - despLastMonth) / despLastMonth) * 100;
+                if (diff > 10) {
+                    insights.push({
+                        icon: '📈',
+                        title: 'Gastos em Alta',
+                        text: `Você gastou ${diff.toFixed(1)}% a mais que no mês passado. Atenção!`
+                    });
+                } else if (diff < -10) {
+                    insights.push({
+                        icon: '📉',
+                        title: 'Redução de Gastos',
+                        text: `Você gastou ${Math.abs(diff).toFixed(1)}% a menos que no mês passado. Ótimo trabalho!`
+                    });
+                }
+            }
+
+            // Insight 4: Dívidas próximas de quitar
+            data.dividasMasters.forEach(m => {
+                const pago = data.despesas.filter(d=>d.debtId===m.id && d.pago).reduce((a,b)=>a+b.val,0);
+                const perc = (pago / m.total) * 100;
+                if (perc >= 75 && perc < 100) {
+                    insights.push({
+                        icon: '🎯',
+                        title: 'Quase lá!',
+                        text: `Faltam apenas ${(100-perc).toFixed(1)}% para quitar a dívida "${m.name}".`
+                    });
+                }
+            });
+
+            // Insight 5: Metas próximas
+            data.goals.forEach(g => {
+                const perc = (g.current / g.target) * 100;
+                if (perc >= 75 && perc < 100) {
+                    insights.push({
+                        icon: g.icon,
+                        title: 'Meta Próxima!',
+                        text: `Você está a ${(100-perc).toFixed(1)}% de atingir a meta "${g.name}".`
+                    });
+                } else if (perc >= 100) {
+                    insights.push({
+                        icon: '🎉',
+                        title: 'Meta Atingida!',
+                        text: `Parabéns! Você atingiu a meta "${g.name}".`
+                    });
+                }
+            });
+
+            // Renderizar insights
+            const html = insights.map(i => `
+                <div class="insight-item">
+                    <span class="insight-icon">${i.icon}</span>
+                    <div class="insight-text">
+                        <h4>${i.title}</h4>
+                        <p>${i.text}</p>
+                    </div>
+                </div>
+            `).join('') || '<p style="color:var(--text-dim); text-align:center;">Adicione mais dados para receber insights personalizados.</p>';
+
+            document.getElementById('insightsList').innerHTML = html;
+        }
+
+        function generateForecast() {
+            const forecasts = [];
+            let [y, m] = data.currentMonth.split('-').map(Number);
+
+            for (let i = 0; i < 6; i++) {
+                let forecastMonth = m + i;
+                let forecastYear = y;
+                while (forecastMonth > 12) {
+                    forecastMonth -= 12;
+                    forecastYear++;
+                }
+                
+                const monthStr = `${forecastYear}-${String(forecastMonth).padStart(2,'0')}`;
+                const recMes = data.receitas.filter(r => r.month === monthStr).reduce((a,b)=>a+b.val, 0);
+                const despMes = data.despesas.filter(d => d.month === monthStr).reduce((a,b)=>a+b.val, 0);
+                const saldo = recMes - despMes;
+
+                forecasts.push({
+                    month: mesesNomes[forecastMonth-1],
+                    receitas: recMes,
+                    despesas: despMes,
+                    saldo: saldo,
+                    status: saldo >= 0 ? 'ok' : saldo >= -500 ? 'warning' : 'danger'
+                });
+            }
+
+            const html = forecasts.map(f => `
+                <div class="forecast-month ${f.status}">
+                    <div>
+                        <strong>${f.month}</strong>
+                        <p style="font-size:0.85rem; color:var(--text-dim); margin-top:5px;">
+                            Receitas: R$ ${f.receitas.toFixed(2)} • Despesas: R$ ${f.despesas.toFixed(2)}
+                        </p>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-family:'Orbitron'; font-size:1.2rem; color:${f.saldo >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                            R$ ${f.saldo.toFixed(2)}
+                        </div>
+                        ${f.status === 'warning' ? '<span style="font-size:0.8rem; color:var(--warning)">⚠️ Saldo baixo</span>' : ''}
+                        ${f.status === 'danger' ? '<span style="font-size:0.8rem; color:var(--danger)">❌ Déficit previsto</span>' : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('forecastContainer').innerHTML = html;
+        }
+
+        function renderForecastChart() {
+            const forecasts = [];
+            const labels = [];
+            const recData = [];
+            const despData = [];
+            
+            let [y, m] = data.currentMonth.split('-').map(Number);
+
+            for (let i = 0; i < 6; i++) {
+                let forecastMonth = m + i;
+                let forecastYear = y;
+                while (forecastMonth > 12) {
+                    forecastMonth -= 12;
+                    forecastYear++;
+                }
+                
+                const monthStr = `${forecastYear}-${String(forecastMonth).padStart(2,'0')}`;
+                const recMes = data.receitas.filter(r => r.month === monthStr).reduce((a,b)=>a+b.val, 0);
+                const despMes = data.despesas.filter(d => d.month === monthStr).reduce((a,b)=>a+b.val, 0);
+
+                labels.push(mesesNomes[forecastMonth-1]);
+                recData.push(recMes);
+                despData.push(despMes);
+            }
+
+            if (forecastChart) forecastChart.destroy();
+
+            const ctx = document.getElementById('forecastChart');
+            if (!ctx) return;
+
+            forecastChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Receitas Previstas',
+                            data: recData,
+                            borderColor: '#00ffaa',
+                            backgroundColor: 'rgba(0,255,170,0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Despesas Previstas',
+                            data: despData,
+                            borderColor: '#ff0055',
+                            backgroundColor: 'rgba(255,0,85,0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCalendar() {
+            const [y, m] = data.currentMonth.split('-').map(Number);
+            const daysInMonth = new Date(y, m, 0).getDate();
+            const firstDay = new Date(y, m - 1, 1).getDay();
+
+            let html = '<div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:5px; margin-bottom:15px;">';
+            ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].forEach(d => {
+                html += `<div style="text-align:center; font-weight:600; color:var(--accent); padding:10px;">${d}</div>`;
+            });
+            html += '</div><div class="calendar-container">';
+
+            // Dias vazios antes do início do mês
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div class="calendar-day" style="opacity:0.3;"></div>';
+            }
+
+            // Dias do mês
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                
+                const hasIncome = data.receitas.some(r => r.month === data.currentMonth);
+                const hasExpense = data.despesas.some(d => d.month === data.currentMonth);
+                
+                let classes = 'calendar-day';
+                if (hasIncome && hasExpense) classes += ' has-both';
+                else if (hasIncome) classes += ' has-income';
+                else if (hasExpense) classes += ' has-expense';
+
+                html += `
+                    <div class="${classes}">
+                        <strong style="font-size:1.2rem;">${day}</strong>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            document.getElementById('calendarView').innerHTML = html;
+        }
+
+        function checkAlerts() {
+            const alerts = [];
+            const cm = data.currentMonth;
+
+            // Alerta: Despesas pendentes
+            const pendentes = data.despesas.filter(d => d.month === cm && !d.pago);
+            if (pendentes.length > 0) {
+                const totalPendente = pendentes.reduce((a,b)=>a+b.val,0);
+                alerts.push({
+                    icon: '⚠️',
+                    message: `Você tem ${pendentes.length} despesa(s) pendente(s) totalizando R$ ${totalPendente.toFixed(2)}`
+                });
+            }
+
+            // Alerta: Gastos acima da média
+            const despMes = data.despesas.filter(d => d.month === cm).reduce((a,b)=>a+b.val, 0);
+            const avgDesp = data.despesas.reduce((a,b)=>a+b.val, 0) / 12;
+            if (despMes > avgDesp * 1.2) {
+                alerts.push({
+                    icon: '📈',
+                    message: `Seus gastos este mês estão 20% acima da média anual`
+                });
+            }
+
+            // Renderizar alertas
+            const html = alerts.map(a => `
+                <div class="alert-box">
+                    <span class="alert-icon">${a.icon}</span>
+                    <p>${a.message}</p>
+                </div>
+            `).join('');
+
+            document.getElementById('alertsContainer').innerHTML = html;
+        }
+
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+            
+            // Aba Receitas
+            const receitasData = [['Mês', 'Descrição', 'Valor']];
+            data.receitas.forEach(r => {
+                const mes = mesesNomes[parseInt(r.month.split('-')[1]) - 1];
+                receitasData.push([mes, r.desc, r.val]);
+            });
+            const wsReceitas = XLSX.utils.aoa_to_sheet(receitasData);
+            XLSX.utils.book_append_sheet(wb, wsReceitas, 'Receitas');
+            
+            // Aba Despesas
+            const despesasData = [['Mês', 'Descrição', 'Categoria', 'Tipo', 'Valor', 'Status']];
+            data.despesas.forEach(d => {
+                const mes = mesesNomes[parseInt(d.month.split('-')[1]) - 1];
+                despesasData.push([mes, d.desc, d.categoria || '', d.tipo, d.val, d.pago ? 'PAGO' : 'PENDENTE']);
+            });
+            const wsDespesas = XLSX.utils.aoa_to_sheet(despesasData);
+            XLSX.utils.book_append_sheet(wb, wsDespesas, 'Despesas');
+            
+            // Aba Dívidas
+            const dividasData = [['Dívida', 'Valor Total', 'Pago', 'Restante', 'Percentual']];
+            data.dividasMasters.forEach(m => {
+                const pago = data.despesas.filter(d => d.debtId === m.id && d.pago).reduce((sum, d) => sum + d.val, 0);
+                const restante = Math.max(0, m.total - pago);
+                const perc = ((pago / m.total) * 100).toFixed(1);
+                dividasData.push([m.name, m.total, pago, restante, `${perc}%`]);
+            });
+            const wsDividas = XLSX.utils.aoa_to_sheet(dividasData);
+            XLSX.utils.book_append_sheet(wb, wsDividas, 'Dívidas');
+            
+            // Aba Metas
+            const metasData = [['Meta', 'Ícone', 'Valor Alvo', 'Valor Atual', 'Restante', 'Progresso']];
+            data.goals.forEach(g => {
+                const restante = g.target - g.current;
+                const perc = ((g.current / g.target) * 100).toFixed(1);
+                metasData.push([g.name, g.icon, g.target, g.current, restante, `${perc}%`]);
+            });
+            const wsMetas = XLSX.utils.aoa_to_sheet(metasData);
+            XLSX.utils.book_append_sheet(wb, wsMetas, 'Metas');
+            
+            const hoje = new Date();
+            const nomeArquivo = `NexusFinancePro_${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}.xlsx`;
+            XLSX.writeFile(wb, nomeArquivo);
+            
+            showNotification('Exportado!', 'Arquivo Excel gerado com sucesso', '📤');
+        }
+
+        function clearAllData() {
+            if (confirm("DESEJA REALMENTE APAGAR TODOS OS DADOS?")) {
+                localStorage.removeItem('NexusFinancePro2026');
+                location.reload();
+            }
+        }
+
+        window.onload = init;
+
+        // Controlar visibilidade do botão mobile
+        function checkMobileMenu() {
+            const mobileBtn = document.querySelector('.mobile-menu-btn');
+            if (window.innerWidth <= 768) {
+                mobileBtn.style.display = 'flex';
+            } else {
+                mobileBtn.style.display = 'none';
+                document.getElementById('sidebar').classList.remove('mobile-open');
+                document.querySelector('.mobile-overlay').classList.remove('active');
+            }
+        }
+
+        window.addEventListener('resize', checkMobileMenu);
+        window.addEventListener('load', checkMobileMenu);
+    </script>
+</body>
+</html>
